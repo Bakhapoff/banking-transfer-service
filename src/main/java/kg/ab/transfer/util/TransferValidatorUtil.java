@@ -10,16 +10,9 @@ import java.math.BigDecimal;
 public class TransferValidatorUtil {
 
     public void validate(Account fromAccount, Account toAccount, BigDecimal amount) {
-        validateAmount(amount);
         validateAccountStatus(fromAccount);
         validateAccountStatus(toAccount);
         validateSufficientBalance(fromAccount, amount);
-    }
-
-    private void validateAmount(BigDecimal amount) {
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Amount must be greater than zero");
-        }
     }
 
     private void validateAccountStatus(Account account) {

@@ -1,5 +1,6 @@
 package kg.ab.transfer.controller;
 
+import jakarta.validation.Valid;
 import kg.ab.transfer.model.payload.request.TransferRequest;
 import kg.ab.transfer.model.payload.response.TransferResponse;
 import kg.ab.transfer.service.TransferService;
@@ -18,7 +19,7 @@ public class TransferController {
     private final TransferService transferService;
 
     @PostMapping
-    public ResponseEntity<TransferResponse> create(@RequestBody TransferRequest request) {
+    public ResponseEntity<TransferResponse> create(@Valid @RequestBody TransferRequest request) {
         TransferResponse response = transferService.transfer(request);
         return ResponseEntity.ok(response);
     }
