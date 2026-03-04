@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -29,11 +31,16 @@ public class TransferServiceImpl implements TransferService {
     @Override
     @Transactional
     public TransferResponse transfer(TransferRequest request) {
-        Account fromAccount = accountRepository.findByAccountNumber(request.fromAccountNumber())
-                .orElseThrow(() -> new AccountNotFoundException("Account not found: " + request.fromAccountNumber()));
+        List<String> ordered = Stream.of(request.fromAccountNumber(), request.toAccountNumber()).sorted().toList();
 
-        Account toAccount = accountRepository.findByAccountNumber(request.toAccountNumber())
-                .orElseThrow(() -> new AccountNotFoundException("Account not found: " + request.fromAccountNumber()));
+        Account first = accountRepository.findByAccountNumberForUpdate(ordered.getFirst())
+                .orElseThrow(() -> new AccountNotFoundException("Account not found: " + ordered.getFirst()));
+
+        Account second = accountRepository.findByAccountNumberForUpdate(ordered.getLast())
+                .orElseThrow(() -> new AccountNotFoundException("Account not found: " + ordered.getLast()));
+
+        Account fromAccount = ordered.getFirst().equals(request.fromAccountNumber()) ? first : second;
+        Account toAccount = ordered.getFirst().equals(request.fromAccountNumber()) ? second : first;
 
         transferValidator.validate(fromAccount, toAccount, request.amount());
 
