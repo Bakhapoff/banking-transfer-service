@@ -1,9 +1,11 @@
 package kg.ab.transfer.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import kg.ab.transfer.exception.custom_exception.AccountBlockedException;
-import kg.ab.transfer.exception.custom_exception.AccountNotFoundException;
+import kg.ab.transfer.exception.custom_exception.InvalidPaginationException;
+import kg.ab.transfer.exception.custom_exception.InvalidDateRangeException;
 import kg.ab.transfer.exception.custom_exception.InsufficientFundsException;
+import kg.ab.transfer.exception.custom_exception.AccountNotFoundException;
+import kg.ab.transfer.exception.custom_exception.AccountBlockedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -47,19 +49,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidPaginationException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidPaginationException(InvalidPaginationException ipe) {
+        return buildError(ipe.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidDateRangeException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidDateRangeException(InvalidDateRangeException idre) {
+        return buildError(idre.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(InsufficientFundsException.class)
-    public ResponseEntity<Map<String, String>> handleInsufficientFunds(InsufficientFundsException e) {
-        return buildError(e.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Map<String, String>> handleInsufficientFunds(InsufficientFundsException ife) {
+        return buildError(ife.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AccountNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleAccountNotFound(AccountNotFoundException e) {
-        return buildError(e.getMessage(), HttpStatus.NOT_FOUND);
+    public ResponseEntity<Map<String, String>> handleAccountNotFound(AccountNotFoundException anfe) {
+        return buildError(anfe.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(AccountBlockedException.class)
-    public ResponseEntity<Map<String, String>> handleAccountBlocked(AccountBlockedException e) {
-        return buildError(e.getMessage(), HttpStatus.FORBIDDEN);
+    public ResponseEntity<Map<String, String>> handleAccountBlocked(AccountBlockedException abe) {
+        return buildError(abe.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(Exception.class)
