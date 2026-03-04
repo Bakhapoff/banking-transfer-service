@@ -12,12 +12,10 @@ import java.time.LocalDateTime;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
     @Query("SELECT t FROM Transaction t WHERE t.account.accountNumber = :accountNumber " +
-            "AND (:fromDate IS NULL OR t.createdAt >= :fromDate) " +
-            "AND (:toDate IS NULL OR t.createdAt <= :toDate)")
-    Page<Transaction> findByAccountNumberAndDateRange(
-            @Param("accountNumber") String accountNumber,
-            @Param("fromDate") LocalDateTime fromDate,
-            @Param("toDate") LocalDateTime toDate,
-            Pageable pageable
-    );
+            "AND (cast(:fromDate as localDateTime) IS NULL OR t.createdAt >= :fromDate) " +
+            "AND (cast(:toDate as localDateTime) IS NULL OR t.createdAt <= :toDate)")
+    Page<Transaction> findByAccountNumberAndDateRange(@Param("accountNumber") String accountNumber,
+                                                      @Param("fromDate") LocalDateTime fromDate,
+                                                      @Param("toDate") LocalDateTime toDate,
+                                                      Pageable pageable);
 }
