@@ -1,7 +1,6 @@
 package kg.ab.transfer.exception;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-import kg.ab.transfer.exception.custom_exception.InvalidPaginationException;
 import kg.ab.transfer.exception.custom_exception.InvalidDateRangeException;
 import kg.ab.transfer.exception.custom_exception.InsufficientFundsException;
 import kg.ab.transfer.exception.custom_exception.AccountNotFoundException;
@@ -47,11 +46,6 @@ public class GlobalExceptionHandler {
                 errors.put("error", error.getDefaultMessage())
         );
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(InvalidPaginationException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidPaginationException(InvalidPaginationException ipe) {
-        return buildError(ipe.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(InvalidDateRangeException.class)

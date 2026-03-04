@@ -1,6 +1,7 @@
 package kg.ab.transfer.service.impl;
 
 import kg.ab.transfer.exception.custom_exception.AccountNotFoundException;
+import kg.ab.transfer.exception.custom_exception.InvalidDateRangeException;
 import kg.ab.transfer.model.entity.Account;
 import kg.ab.transfer.model.entity.Transaction;
 import kg.ab.transfer.model.payload.response.AccountResponse;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,8 +28,13 @@ public class AccountServiceImpl implements AccountService {
     private final TransactionRepository transactionRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public AccountResponse filter(String accountNumber, LocalDateTime fromDate,
                                   LocalDateTime toDate, int page, int size) {
+
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new InvalidDateRangeException("fromDate must be before toDate");
+        }
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found: " + accountNumber));
