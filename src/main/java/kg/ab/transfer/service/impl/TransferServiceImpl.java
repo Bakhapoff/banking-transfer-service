@@ -2,19 +2,19 @@ package kg.ab.transfer.service.impl;
 
 import kg.ab.transfer.model.entity.Account;
 import kg.ab.transfer.model.entity.Transaction;
-import kg.ab.transfer.model.enums.OperationType;
 import kg.ab.transfer.model.enums.TransactionStatus;
 import kg.ab.transfer.model.payload.request.TransferRequest;
 import kg.ab.transfer.model.payload.response.TransferResponse;
 import kg.ab.transfer.repository.AccountRepository;
 import kg.ab.transfer.repository.TransactionRepository;
 import kg.ab.transfer.service.TransferService;
+import kg.ab.transfer.util.TransactionFactoryUtil;
+import kg.ab.transfer.util.TransferValidatorUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,54 +22,43 @@ public class TransferServiceImpl implements TransferService {
 
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
+    private final TransferValidatorUtil transferValidatorUtil;
+    private final TransactionFactoryUtil transactionFactoryUtil;
 
     @Override
     @Transactional
     public TransferResponse transfer(TransferRequest request) {
-        Optional<Account> fromAccount = accountRepository.findByAccountNumber(request.fromAccountNumber());
-        Optional<Account> toAccount = accountRepository.findByAccountNumber(request.toAccountNumber());
+        Account fromAccount = accountRepository.findByAccountNumber(request.fromAccountNumber())
+                .orElseThrow(() -> new RuntimeException("Account not found: " + request.fromAccountNumber()));
 
-        if (fromAccount.isPresent() && toAccount.isPresent()) {
-            Account fromAccountEntity = fromAccount.get();
-            Account toAccountEntity = toAccount.get();
+        Account toAccount = accountRepository.findByAccountNumber(request.toAccountNumber())
+                .orElseThrow(() -> new RuntimeException("Account not found: " + request.fromAccountNumber()));
 
-            BigDecimal balanceAfterFromAccount = fromAccountEntity.getBalance().subtract(request.amount());
-            BigDecimal balanceAfterToAccount = toAccountEntity.getBalance().add(request.amount());
+        transferValidatorUtil.validate(fromAccount, toAccount, request.amount());
 
-            fromAccountEntity.setBalance(balanceAfterFromAccount);
-            toAccountEntity.setBalance(balanceAfterToAccount);
+        BigDecimal balanceAfterFrom = fromAccount.getBalance().subtract(request.amount());
+        BigDecimal balanceAfterTo = toAccount.getBalance().add(request.amount());
 
-            Transaction transactionFromAccount = new Transaction();
-            transactionFromAccount.setOperationType(OperationType.DEBIT);
-            transactionFromAccount.setAmount(request.amount());
-            transactionFromAccount.setBalanceAfter(balanceAfterFromAccount);
-            transactionFromAccount.setStatus(TransactionStatus.SUCCESS);
-            transactionFromAccount.setAccount(fromAccountEntity);
-            transactionFromAccount.setCounterpartAccount(toAccountEntity);
+        fromAccount.setBalance(balanceAfterFrom);
+        toAccount.setBalance(balanceAfterTo);
 
-            Transaction transactionToAccount = new Transaction();
-            transactionToAccount.setOperationType(OperationType.CREDIT);
-            transactionToAccount.setAmount(request.amount());
-            transactionToAccount.setBalanceAfter(balanceAfterToAccount);
-            transactionToAccount.setStatus(TransactionStatus.SUCCESS);
-            transactionToAccount.setAccount(toAccountEntity);
-            transactionToAccount.setCounterpartAccount(fromAccountEntity);
+        accountRepository.save(fromAccount);
+        accountRepository.save(toAccount);
 
-            accountRepository.save(fromAccountEntity);
-            accountRepository.save(toAccountEntity);
+        Transaction transactionFrom = transactionFactoryUtil.buildDebit(
+                fromAccount, toAccount, request.amount(), balanceAfterFrom, TransactionStatus.SUCCESS);
 
-            transactionRepository.save(transactionFromAccount);
-            transactionRepository.save(transactionToAccount);
+        Transaction transactionTo = transactionFactoryUtil.buildCredit(
+                fromAccount, toAccount, request.amount(), balanceAfterTo, TransactionStatus.SUCCESS);
 
-            return new TransferResponse(
-                    request.fromAccountNumber(),
-                    request.toAccountNumber(),
-                    request.amount(),
-                    TransactionStatus.SUCCESS
-            );
+        transactionRepository.save(transactionFrom);
+        transactionRepository.save(transactionTo);
 
-        } else {
-            throw new RuntimeException("Unknown error");
-        }
+        return new TransferResponse(
+                request.fromAccountNumber(),
+                request.toAccountNumber(),
+                request.amount(),
+                TransactionStatus.SUCCESS
+        );
     }
 }
