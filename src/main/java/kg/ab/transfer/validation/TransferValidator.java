@@ -1,5 +1,7 @@
-package kg.ab.transfer.util;
+package kg.ab.transfer.validation;
 
+import kg.ab.transfer.exception.custom_exception.AccountBlockedException;
+import kg.ab.transfer.exception.custom_exception.InsufficientFundsException;
 import kg.ab.transfer.model.entity.Account;
 import kg.ab.transfer.model.enums.AccountStatus;
 import org.springframework.stereotype.Component;
@@ -7,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
 @Component
-public class TransferValidatorUtil {
+public class TransferValidator {
 
     public void validate(Account fromAccount, Account toAccount, BigDecimal amount) {
         validateAccountStatus(fromAccount);
@@ -17,13 +19,14 @@ public class TransferValidatorUtil {
 
     private void validateAccountStatus(Account account) {
         if (account.getStatus() == AccountStatus.BLOCKED) {
-            throw new RuntimeException("Account " + account.getAccountNumber() + " is blocked");
+            throw new AccountBlockedException("Account " + account.getAccountNumber() + " is blocked");
         }
     }
 
     private void validateSufficientBalance(Account fromAccount, BigDecimal amount) {
         if (fromAccount.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient funds on account " + fromAccount.getAccountNumber());
+            throw new InsufficientFundsException("Insufficient funds on account " + fromAccount.getAccountNumber() +
+                    ". Current balance: " + fromAccount.getBalance());
         }
     }
 }

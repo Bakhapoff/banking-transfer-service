@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.DecimalMax;
-import kg.ab.transfer.validation.DifferentAccounts;
+import kg.ab.transfer.validation.annotation.DifferentAccounts;
 
 import java.math.BigDecimal;
 
@@ -23,7 +23,7 @@ public record TransferRequest(
                 message = "<toAccountNumber> must be a 10-digit number starting with non-zero.")
         String toAccountNumber,
 
-        @NotNull(message = "<amount> must not be null.")
+        @NotNull(message = "<amount> must not be null or blank.")
         @Positive(message = "<amount> must be positive.")
         @Digits(integer = 6, fraction = 2,
                 message = "<amount> must contain no more than 2 decimal places and no more than 6 digits before the decimal point.")
