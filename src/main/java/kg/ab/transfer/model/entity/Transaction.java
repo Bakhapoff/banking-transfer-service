@@ -57,25 +57,36 @@ public class Transaction {
 
     private Transaction() {}
 
-    public static Transaction debit(Account from, Account to, BigDecimal amount, BigDecimal balanceAfter) {
+    public static Transaction debit(Account fromAccount, Account toAccount, BigDecimal amount, BigDecimal balanceAfter) {
         Transaction tx = new Transaction();
         tx.operationType = OperationType.DEBIT;
-        tx.account = from;
-        tx.counterpartAccount = to;
+        tx.account = fromAccount;
+        tx.counterpartAccount = toAccount;
         tx.amount = amount;
         tx.balanceAfter = balanceAfter;
         tx.status = TransactionStatus.SUCCESS;
         return tx;
     }
 
-    public static Transaction credit(Account from, Account to, BigDecimal amount, BigDecimal balanceAfter) {
+    public static Transaction credit(Account fromAccount, Account toAccount, BigDecimal amount, BigDecimal balanceAfter) {
         Transaction tx = new Transaction();
         tx.operationType = OperationType.CREDIT;
-        tx.account = to;
-        tx.counterpartAccount = from;
+        tx.account = toAccount;
+        tx.counterpartAccount = fromAccount;
         tx.amount = amount;
         tx.balanceAfter = balanceAfter;
         tx.status = TransactionStatus.SUCCESS;
+        return tx;
+    }
+
+    public static Transaction failed(Account fromAccount, Account toAccount, BigDecimal amount, OperationType operationType) {
+        Transaction tx = new Transaction();
+        tx.operationType = operationType;
+        tx.account = fromAccount;
+        tx.counterpartAccount = toAccount;
+        tx.amount = amount;
+        tx.balanceAfter = fromAccount.getBalance();
+        tx.status = TransactionStatus.FAILED;
         return tx;
     }
 }
