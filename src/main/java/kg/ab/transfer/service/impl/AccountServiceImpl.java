@@ -29,11 +29,11 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public AccountResponse filter(String accountNumber, LocalDateTime fromDate,
-                                  LocalDateTime toDate, int page, int size) {
+    public AccountResponse filter(String accountNumber, LocalDateTime from,
+                                  LocalDateTime to, int page, int size) {
 
-        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
-            throw new InvalidDateRangeException("fromDate must be before toDate");
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new InvalidDateRangeException("<from> must be before <to>");
         }
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
@@ -42,7 +42,7 @@ public class AccountServiceImpl implements AccountService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<Transaction> transactionPage = transactionRepository
-                .findByAccountNumberAndDateRange(accountNumber, fromDate, toDate, pageable);
+                .findByAccountNumberAndDateRange(accountNumber, from, to, pageable);
 
         List<TransactionResponse> transactions = transactionPage.getContent().stream()
                 .map(transaction -> new TransactionResponse(

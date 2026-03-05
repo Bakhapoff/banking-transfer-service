@@ -6,6 +6,6 @@ import java.time.LocalDateTime;
 
 public interface AccountService {
 
-    AccountResponse filter(String accountNumber, LocalDateTime fromDate,
-                           LocalDateTime toDate, int page, int size);
+    AccountResponse filter(String accountNumber, LocalDateTime from,
+                           LocalDateTime to, int page, int size);
 }
