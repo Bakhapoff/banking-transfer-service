@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import kg.ab.transfer.exception.custom_exception.InsufficientFundsException;
 import kg.ab.transfer.model.enums.AccountStatus;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,4 +46,26 @@ public class Account {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    public BigDecimal debit(BigDecimal amount) {
+        validateAmount(amount);
+        if (this.balance.compareTo(amount) < 0) {
+            throw new InsufficientFundsException(
+                    "Insufficient funds on account " + this.accountNumber + ". Current balance: " + this.balance);
+        }
+        this.balance = this.balance.subtract(amount);
+        return this.balance;
+    }
+
+    public BigDecimal credit(BigDecimal amount) {
+        validateAmount(amount);
+        this.balance = this.balance.add(amount);
+        return this.balance;
+    }
+
+    private void validateAmount(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+    }
 }

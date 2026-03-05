@@ -5,7 +5,9 @@ import kg.ab.transfer.model.entity.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
@@ -13,6 +15,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByAccountNumber(String accountNumber);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT a FROM Account a WHERE a.accountNumber = :accountNumber")
-    Optional<Account> findByAccountNumberForUpdate(String accountNumber);
+    @Query("SELECT a FROM Account a WHERE a.accountNumber IN :accountNumbers")
+    List<Account> findAllByAccountNumberInForUpdate(@Param("accountNumbers") List<String> accountNumbers);
 }
