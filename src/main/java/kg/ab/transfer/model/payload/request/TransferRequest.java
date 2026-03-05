@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.DecimalMax;
-import kg.ab.transfer.validation.annotation.DifferentAccounts;
+import kg.ab.transfer.validation.DifferentAccounts;
 
 import java.math.BigDecimal;
 

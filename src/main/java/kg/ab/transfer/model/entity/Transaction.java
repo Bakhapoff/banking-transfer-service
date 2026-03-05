@@ -54,4 +54,28 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "counterpart_account_id")
     private Account counterpartAccount;
+
+    private Transaction() {}
+
+    public static Transaction debit(Account from, Account to, BigDecimal amount, BigDecimal balanceAfter) {
+        Transaction tx = new Transaction();
+        tx.operationType = OperationType.DEBIT;
+        tx.account = from;
+        tx.counterpartAccount = to;
+        tx.amount = amount;
+        tx.balanceAfter = balanceAfter;
+        tx.status = TransactionStatus.SUCCESS;
+        return tx;
+    }
+
+    public static Transaction credit(Account from, Account to, BigDecimal amount, BigDecimal balanceAfter) {
+        Transaction tx = new Transaction();
+        tx.operationType = OperationType.CREDIT;
+        tx.account = to;
+        tx.counterpartAccount = from;
+        tx.amount = amount;
+        tx.balanceAfter = balanceAfter;
+        tx.status = TransactionStatus.SUCCESS;
+        return tx;
+    }
 }

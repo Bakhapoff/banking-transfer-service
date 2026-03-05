@@ -1,4 +1,4 @@
-package kg.ab.transfer.validation.annotation;
+package kg.ab.transfer.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
