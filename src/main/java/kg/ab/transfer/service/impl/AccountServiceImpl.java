@@ -10,6 +10,7 @@ import kg.ab.transfer.repository.AccountRepository;
 import kg.ab.transfer.repository.TransactionRepository;
 import kg.ab.transfer.service.AccountService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
@@ -32,12 +34,18 @@ public class AccountServiceImpl implements AccountService {
     public AccountResponse filter(String accountNumber, LocalDateTime from,
                                   LocalDateTime to, int page, int size) {
 
+        log.debug("Statement requested: accountNumber={}, from={}, to={}, page={}, size={}",
+                accountNumber, from, to, page, size);
+
         if (from != null && to != null && from.isAfter(to)) {
+            log.warn("Invalid date range: from={} is after to={}, accountNumber={}", from, to, accountNumber);
             throw new InvalidDateRangeException("<from> must be before <to>");
         }
 
-        Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new AccountNotFoundException("Account not found: " + accountNumber));
+        Account account = accountRepository.findByAccountNumber(accountNumber).orElseThrow(() -> {
+            log.warn("Account not found: accountNumber={}", accountNumber);
+            return new AccountNotFoundException("Account not found: " + accountNumber);
+        });
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
@@ -52,6 +60,8 @@ public class AccountServiceImpl implements AccountService {
                         transaction.getBalanceAfter()
                 )).toList();
 
+        log.debug("Statement fetched: accountNumber={}, totalTransactions={}, page={}/{}",
+                accountNumber, transactionPage.getTotalElements(), page, transactionPage.getTotalPages());
         return new AccountResponse(
                 account.getAccountNumber(),
                 account.getBalance(),

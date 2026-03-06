@@ -14,6 +14,7 @@ import kg.ab.transfer.repository.TransactionRepository;
 import kg.ab.transfer.service.TransactionAuditService;
 import kg.ab.transfer.service.TransferService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransferServiceImpl implements TransferService {
@@ -33,24 +35,33 @@ public class TransferServiceImpl implements TransferService {
     @Override
     @Transactional
     public TransferResponse transfer(TransferRequest request) {
+        log.info("Transfer initiated: fromAccount={}, toAccount={}, amount={}",
+                request.fromAccountNumber(), request.toAccountNumber(), request.amount());
+
         Map<String, Account> accounts = accountRepository.findAllByAccountNumberInForUpdate(
                         List.of(request.fromAccountNumber(), request.toAccountNumber()))
                 .stream()
                 .collect(Collectors.toMap(Account::getAccountNumber, a -> a));
 
         Account fromAccount = getAccount(accounts, request.fromAccountNumber());
-        Account toAccount   = getAccount(accounts, request.toAccountNumber());
+        Account toAccount = getAccount(accounts, request.toAccountNumber());
+
+        log.debug("Accounts loaded for transfer: fromAccount={} status={}, toAccount={} status={}",
+                fromAccount.getAccountNumber(), fromAccount.getStatus(), toAccount.getAccountNumber(), toAccount.getStatus());
 
         try {
             validate(fromAccount, toAccount);
 
             BigDecimal balanceAfterFrom = fromAccount.debit(request.amount());
-            BigDecimal balanceAfterTo   = toAccount.credit(request.amount());
+            BigDecimal balanceAfterTo = toAccount.credit(request.amount());
 
-            Transaction debitTx  = Transaction.debit(fromAccount, toAccount, request.amount(), balanceAfterFrom);
+            Transaction debitTx = Transaction.debit(fromAccount, toAccount, request.amount(), balanceAfterFrom);
             Transaction creditTx = Transaction.credit(fromAccount, toAccount, request.amount(), balanceAfterTo);
 
             transactionRepository.saveAll(List.of(debitTx, creditTx));
+
+            log.info("Transfer completed successfully: fromAccount={}, toAccount={}, amount={}, debitTxId={}, creditTxId={}",
+                    request.fromAccountNumber(), request.toAccountNumber(), request.amount(), debitTx.getId(), creditTx.getId());
 
             return new TransferResponse(
                     request.fromAccountNumber(),
@@ -59,6 +70,8 @@ public class TransferServiceImpl implements TransferService {
                     TransactionStatus.SUCCESS
             );
         } catch (AccountBlockedException | InsufficientFundsException e) {
+            log.warn("Transfer failed : fromAccount={}, toAccount={}, amount={}, error={}",
+                    request.fromAccountNumber(), request.toAccountNumber(), request.amount(), e.getMessage());
             transactionAuditService.saveFailedTransfer(fromAccount, toAccount, request.amount());
             throw e;
         }
