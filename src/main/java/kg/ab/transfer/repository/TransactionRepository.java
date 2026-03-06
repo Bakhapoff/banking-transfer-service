@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
     @Query("SELECT t FROM Transaction t WHERE t.account.accountNumber = :accountNumber " +
+            "AND t.status = kg.ab.transfer.model.enums.TransactionStatus.SUCCESS " +
             "AND (cast(:from as localDateTime) IS NULL OR t.createdAt >= :from) " +
             "AND (cast(:to as localDateTime) IS NULL OR t.createdAt <= :to)")
     Page<Transaction> findByAccountNumberAndDateRange(@Param("accountNumber") String accountNumber,

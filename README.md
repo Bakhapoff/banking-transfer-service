@@ -92,3 +92,27 @@ docker-compose down -v
 ## API Documentation
 
 Swagger UI: `http://localhost:8080/swagger-ui/index.html`
+
+## Test Data
+
+The database is pre-populated with test accounts:
+
+| Account Number | Balance | Status  | Owner           |
+|----------------|---------|---------|-----------------|
+| 1000000001     | 1000    | ACTIVE  | Mirbek Atabekov |
+| 1000000002     | 1000    | ACTIVE  | Temir Nazarov   |
+| 1000000003     | 1000    | BLOCKED | Ivan Ivanov     |
+| 1000000004     | 1000    | ACTIVE  | Sveta Svetikova |
+| 1000000005     | 1000    | ACTIVE  | Petr Petrov     |
+| 1000000006     | 1000    | BLOCKED | Michael Jackson |
+| 1000000007     | 1000    | ACTIVE  | Naruto Uzumaki  |
+| 1000000008     | 1000    | ACTIVE  | Optimus Prime   |
+
+### Example transfer request
+```json
+{
+  "fromAccountNumber": "1000000001",
+  "toAccountNumber": "1000000002",
+  "amount": 100
+}
+```
