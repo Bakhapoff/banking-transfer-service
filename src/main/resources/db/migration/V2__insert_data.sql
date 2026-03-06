@@ -35,3 +35,57 @@ VALUES (
            NOW(),
            2
        );
+
+INSERT INTO accounts (account_number, balance, status, created_at, user_id)
+VALUES (
+           '1000000003',
+           1000,
+           'BLOCKED',
+           NOW(),
+           1
+       );
+
+INSERT INTO accounts (account_number, balance, status, created_at, user_id)
+VALUES (
+           '1000000004',
+           1000,
+           'ACTIVE',
+           NOW(),
+           2
+       );
+
+INSERT INTO accounts (account_number, balance, status, created_at, user_id)
+VALUES (
+           '1000000005',
+           1000,
+           'ACTIVE',
+           NOW(),
+           1
+       );
+
+INSERT INTO accounts (account_number, balance, status, created_at, user_id)
+VALUES (
+           '1000000006',
+           1000,
+           'BLOCKED',
+           NOW(),
+           2
+       );
+
+INSERT INTO accounts (account_number, balance, status, created_at, user_id)
+VALUES (
+           '1000000007',
+           1000,
+           'ACTIVE',
+           NOW(),
+           1
+       );
+
+INSERT INTO accounts (account_number, balance, status, created_at, user_id)
+VALUES (
+           '1000000008',
+           1000,
+           'ACTIVE',
+           NOW(),
+           2
+       );
