@@ -88,3 +88,7 @@ docker-compose down
 # Stop containers and delete all data
 docker-compose down -v
 ```
+
+## API Documentation
+
+Swagger UI: `http://localhost:8080/swagger-ui/index.html`

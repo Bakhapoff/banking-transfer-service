@@ -1,9 +1,11 @@
 package kg.ab.transfer.service.impl;
 
+import kg.ab.transfer.exception.custom_exception.AccountBlockedException;
 import kg.ab.transfer.exception.custom_exception.AccountNotFoundException;
 import kg.ab.transfer.exception.custom_exception.InvalidDateRangeException;
 import kg.ab.transfer.model.entity.Account;
 import kg.ab.transfer.model.entity.Transaction;
+import kg.ab.transfer.model.enums.AccountStatus;
 import kg.ab.transfer.model.payload.response.AccountResponse;
 import kg.ab.transfer.model.payload.response.inner.TransactionResponse;
 import kg.ab.transfer.repository.AccountRepository;
@@ -47,6 +49,8 @@ public class AccountServiceImpl implements AccountService {
             return new AccountNotFoundException("Account not found: " + accountNumber);
         });
 
+        validateAccountStatus(account);
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<Transaction> transactionPage = transactionRepository
@@ -70,5 +74,11 @@ public class AccountServiceImpl implements AccountService {
                 transactionPage.getTotalPages(),
                 transactionPage.getTotalElements()
         );
+    }
+
+    private void validateAccountStatus(Account account) {
+        if (account.getStatus() != AccountStatus.ACTIVE) {
+            throw new AccountBlockedException("Account " + account.getAccountNumber() + " is blocked");
+        }
     }
 }

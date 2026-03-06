@@ -91,7 +91,7 @@ public class TransferServiceImpl implements TransferService {
     }
 
     private void validateAccountStatus(Account account) {
-        if (account.getStatus() == AccountStatus.BLOCKED) {
+        if (account.getStatus() != AccountStatus.ACTIVE) {
             throw new AccountBlockedException("Account " + account.getAccountNumber() + " is blocked");
         }
     }
