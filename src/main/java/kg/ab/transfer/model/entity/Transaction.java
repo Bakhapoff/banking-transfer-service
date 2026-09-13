@@ -64,7 +64,7 @@ public class Transaction {
         tx.counterpartAccount = toAccount;
         tx.amount = amount;
         tx.balanceAfter = balanceAfter;
-        tx.status = TransactionStatus.SUCCESS;
+        tx.status = TransactionStatus.PENDING;
         return tx;
     }
 
@@ -75,7 +75,7 @@ public class Transaction {
         tx.counterpartAccount = fromAccount;
         tx.amount = amount;
         tx.balanceAfter = balanceAfter;
-        tx.status = TransactionStatus.SUCCESS;
+        tx.status = TransactionStatus.PENDING;
         return tx;
     }
 
